@@ -1,0 +1,62 @@
+// savtush-qa.js
+
+// מאגר השאלות והתשובות
+const qaDatabase = [
+    { question: "מהו הגיל הממוצע לפרישה בישראל?", answer: "67" },
+    { question: "איזה ויטמין חשוב במיוחד לבריאות העצם בגיל המבוגר?", answer: "D" },
+    { question: "מהו שמו של החוק המבטיח זכויות לאזרחים ותיקים בישראל?", answer: "חוק האזרחים הוותיקים" },
+    { question: "איזו פעילות גופנית מומלצת במיוחד לשיפור שיווי המשקל בגיל השלישי?", answer: "טאי צ'י" },
+    { question: "מהו שמו של הקצבה החודשית שמקבלים אזרחים ותיקים מביטוח לאומי?", answer: "קצבת זקנה" }
+];
+
+// משתנה גלובלי לשאלה הנוכחית
+let currentQuestion;
+
+// פונקציה להצגת שאלה אקראית
+function showRandomQuestion() {
+    currentQuestion = qaDatabase[Math.floor(Math.random() * qaDatabase.length)];
+    document.getElementById('questionContainer').textContent = currentQuestion.question;
+    document.getElementById('answerInput').value = '';
+}
+
+// פונקציה לבדיקת תשובה
+function checkAnswer() {
+    const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+    const correctAnswer = currentQuestion.answer.toLowerCase();
+    
+    if (userAnswer === correctAnswer) {
+        alert('כל הכבוד! תשובה נכונה!');
+        showRandomQuestion();
+    } else {
+        alert('לא מדויק. נסה שוב או הצג שאלה חדשה.');
+    }
+}
+
+// פונקציה לפתיחת החלון הקופץ של שאלות ותשובות
+function openSavtushQA() {
+    document.getElementById('savtushQAModal').classList.remove('hidden');
+    showRandomQuestion();
+}
+
+// פונקציה לסגירת החלון הקופץ
+function closeSavtushQA() {
+    document.getElementById('savtushQAModal').classList.add('hidden');
+}
+
+// ייצוא הפונקציות שנרצה להשתמש בהן מחוץ למודול
+export { openSavtushQA, closeSavtushQA, showRandomQuestion, checkAnswer };
+window.addEventListener('load', function() {
+    // אתחול החלון הקופץ אם קיים
+    const modal = document.getElementById('savtushQAModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+});
+// בסוף הקובץ
+window.addEventListener('load', function() {
+    // אתחול החלון הקופץ אם קיים
+    const modal = document.getElementById('savtushQAModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+});

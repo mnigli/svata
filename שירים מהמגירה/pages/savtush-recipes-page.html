@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המתכונים של סבתוש</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold text-center mb-8">המתכונים של סבתוש</h1>
+        <div id="recipesContainer" class="space-y-6">
+            <!-- כאן יוצגו המתכונים -->
+        </div>
+    </div>
+
+    <script>
+        const recipes = [
+            {
+                title: "גפילטע פיש",
+                description: "קציצות דג ממולאות ברוטב מסורתי, מנה קלאסית של סבתא.",
+                instructions: "1. הכנת תערובת הדגים:\n   - טחני 1 ק\"ג דג קרפיון\n   - הוסיפי 2 ביצים, 1 בצל קצוץ, 2 כפות קמח מצה, מלח ופלפל לפי הטעם\n\n2. יצירת הקציצות:\n   - צרי קציצות אובליות מהתערובת\n\n3. בישול ברוטב:\n   - הרתיחי מים עם 2 בצלים חתוכים, 2 גזרים פרוסים, מלח ופלפל\n   - הוסיפי את הקציצות ובשלי על אש נמוכה כשעה\n\n4. הגשה:\n   - הגישי קר עם פרוסות גזר מהרוטב",
+                icon: "🐟"
+            },
+            {
+                title: "עוגת שמרים",
+                description: "עוגת שמרים רכה וריחנית עם מילוי אגוזים וקינמון.",
+                instructions: "1. הכנת בצק השמרים:\n   - ערבבי 500 גרם קמח, 25 גרם שמרים, 100 גרם סוכר, 2 ביצים, 100 מ\"ל חלב, 100 גרם חמאה רכה\n   - לושי עד לקבלת בצק חלק, כסי והתפיחי כשעה\n\n2. הכנת המילוי:\n   - ערבבי 200 גרם אגוזים טחונים, 100 גרם סוכר, 2 כפות קינמון\n\n3. הרכבה ואפייה:\n   - רדדי את הבצק למלבן, מרחי את המילוי\n   - גלגלי וצרי צורת שבלול\n   - התפיחי שוב 30 דקות\n   - אפי ב-180 מעלות כ-30 דקות עד להזהבה",
+                icon: "🍰"
+            },
+            {
+                title: "צימעס",
+                description: "תבשיל ירקות מתוק עם גזר, בטטה ופירות יבשים.",
+                instructions: "1. הכנת הירקות:\n   - קלפי וחתכי לקוביות 500 גרם גזר ו-300 גרם בטטה\n\n2. בישול:\n   - טגני בצל קצוץ בסיר\n   - הוסיפי את הירקות, 100 גרם צימוקים, 100 גרם שזיפים מיובשים\n   - הוסיפי 2 כפות דבש, כף קינמון, מעט מים\n\n3. בישול איטי:\n   - בשלי על אש נמוכה כשעה עד שהירקות רכים והנוזלים מצטמצמים\n\n4. הגשה:\n   - הגישי חם כתוספת לארוחת החג",
+                icon: "🥕"
+            },
+            {
+                title: "קוגל תפוחי אדמה",
+                description: "פשטידת תפוחי אדמה אפויה, פריכה מבחוץ ורכה מבפנים.",
+                instructions: "1. הכנת תפוחי האדמה:\n   - קלפי וגררי 1 ק\"ג תפוחי אדמה\n   - סחטי היטב את הנוזלים\n\n2. הכנת התערובת:\n   - הוסיפי 2 ביצים, 1 בצל מגורר, 3 כפות שמן, מלח ופלפל\n   - ערבבי היטב\n\n3. אפייה:\n   - שמני תבנית אפייה\n   - העבירי את התערובת לתבנית ויישרי\n   - אפי ב-200 מעלות כ-45 דקות עד להזהבה\n\n4. הגשה:\n   - הגישי חם, חתוך לריבועים",
+                icon: "🥔"
+            }
+        ];
+
+        function showRecipes() {
+            const recipesContainer = document.getElementById('recipesContainer');
+            recipesContainer.innerHTML = recipes.map(recipe => `
+                <div class="bg-yellow-50 p-6 rounded-lg shadow-md">
+                    <div class="text-3xl mb-2">${recipe.icon}</div>
+                    <h2 class="text-2xl font-bold mb-2 text-yellow-800">${recipe.title}</h2>
+                    <p class="mb-4 text-yellow-900">${recipe.description}</p>
+                    <button onclick="showRecipeInstructions('${recipe.title}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        הצג מתכון מלא
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function showRecipeInstructions(title) {
+            const recipe = recipes.find(r => r.title === title);
+            const recipesContainer = document.getElementById('recipesContainer');
+            recipesContainer.innerHTML = `
+                <div class="bg-yellow-50 p-6 rounded-lg shadow-md">
+                    <h2 class="text-3xl font-bold mb-4 text-yellow-800">${recipe.title}</h2>
+                    <p class="mb-4 whitespace-pre-line text-yellow-900">${recipe.instructions}</p>
+                    <button onclick="showRecipes()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        חזרה לרשימת המתכונים
+                    </button>
+                </div>
+            `;
+        }
+
+        // הצג את המתכונים בטעינת הדף
+        document.addEventListener('DOMContentLoaded', showRecipes);
+    </script>
+</body>
+</html>

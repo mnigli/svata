@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <script type="module" src="C:\Users\User\Downloads\שירים מהמגירה\savtush-qa.js.txt"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <title>סבתוש</title>
+    <style>
+        .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .button-text {
+            font-size: 24px;
+        }
+        .chat-message {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        #musicControl {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        #volumeControl {
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            z-index: 1000;
+            width: 100px;
+        }
+        .recipe-card {
+            background-color: #FFF8E1;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .recipe-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FF6F00;
+            margin-bottom: 8px;
+        }
+        .recipe-description {
+            font-size: 16px;
+            color: #5D4037;
+            margin-bottom: 12px;
+        }
+        .recipe-button {
+            background-color: #FF6F00;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .recipe-button:hover {
+            background-color: #F57C00;
+        }
+        /* סגנונות overlay וחלון הפופ-אפ */
+        .overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 1000;
+        }
+
+        .recipes-popup {
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background-color: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            z-index: 1001; 
+            width: 80%; 
+            max-width: 600px;
+        }
+
+        .close-popup {
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            cursor: pointer; 
+            font-size: 20px;
+        }
+
+        .full-recipe {
+            background-color: #FFF8E1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .full-recipe h3 {
+            color: #FF6F00;
+            margin-top: 0;
+        }
+        .full-recipe p {
+            white-space: pre-wrap;
+        }
+        .back-button {
+            background-color: #FF6F00;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+.logo {
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.logo:hover {
+    transform: scale(1.2) rotateY(180deg);
+}
+        /* סגנונות חדשים לזכויות של סבתוש */
+        .rights-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .rights-list {
+            list-style: none;
+            padding: 0;
+        }
+        .rights-list li {
+            background-color: #F0F0F0;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .rights-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #FF6F00;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-right bg-gray-100 text-gray-900" dir="rtl">
+<header id="header" class="bg-blue-700 p-8 text-white relative">
+<a href="pages/savtush-store-page.html" style="text-decoration: none;">
+  <div id="storeIcon" style="position: absolute; left: 20px; top: 20px; display: flex; flex-direction: column; align-items: center; color: white; text-align: center;">
+      <i class="fas fa-store" style="font-size: 48px; margin-bottom: 5px;"></i>
+      <span style="font-size: 14px; max-width: 80px; line-height: 1.2;">החנות של סבתוש</span>
+  </div>
+</a>
+        <div class="container mx-auto flex flex-col items-center">
+            <h1 class="text-6xl font-bold mb-4">סבתוש</h1>
+            <p class="text-2xl mb-6">הפלטפורמה הדיגיטלית של הגיל השלישי</p>
+            
+            <!-- תג img עבור הלוגו -->
+<img src="images/savtush-logo.png" alt="סבתוש לוגו" class="logo w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 mb-6 rounded-full shadow-lg">
+            
+            <button id="toggleDarkMode" class="p-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-colors">
+                <i class="fas fa-sun icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-10">
+        <h2 class="text-5xl font-semibold mb-10 text-center">ברוכים הבאים! מה תרצו לעשות היום?</h2>
+        <div class="flex flex-wrap justify-center max-w-5xl mx-auto">
+         
+<button class="flex flex-col items-center justify-center p-8 bg-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105" onclick="window.location.href='C:/Users/User/Downloads/שירים מהמגירה/pages/savtush-family-page-final.html'">
+    <i class="fas fa-images icon"></i>
+<button onclick="window.location.href='C:/Users/User/Downloads/שירים מהמגירה/savtush-qa.js'" class="flex flex-col items-center justify-center p-8 bg-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105">
+    <i class="fas fa-question-circle icon"></i>
+    <span class="text-3xl font-bold text-white text-center button-text">שאלות ותשובות עם סבתוש</span>
+</button>
+
+            <!-- עדכון הכפתור של קריאת חדשות -->
+  <a href="pages/savtush-content-world-final.html" class="flex flex-col items-center justify-center p-8 bg-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105">
+    <i class="fas fa-newspaper icon"></i>
+    <span class="text-3xl font-bold text-white text-center button-text">עולם התוכן של סבתוש</span>
+ <a href="pages/savtush-rights.html" class="flex flex-col items-center justify-center p-8 bg-pink-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105">
+    <i class="fas fa-gavel icon"></i>
+    <span class="text-3xl font-bold text-white text-center button-text">הזכויות של סבתוש</span>
+</a>
+          <button class="flex flex-col items-center justify-center p-8 bg-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105" onclick="startVideoChat()">
+                <i class="fas fa-comments icon"></i>
+                <span class="text-3xl font-bold text-white text-center button-text">סבתוש מדברת עם הנכדים</span>
+            </button>
+            <button class="flex flex-col items-center justify-center p-8 bg-yellow-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105" onclick="openQuestionnaire()">
+                <i class="fas fa-clipboard-list icon"></i>
+                <span class="text-3xl font-bold text-white text-center button-text">מה שלומך סבתוש</span>
+            </button>
+            
+            <!-- הוספת כפתור חדש למתכונים של סבתוש -->
+            
+<a href="pages/savtush-recipes-page.html" class="flex flex-col items-center justify-center p-8 bg-yellow-500 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-64 m-4 transform hover:scale-105">
+    <i class="fas fa-utensils icon"></i>
+    <span class="text-3xl font-bold text-white text-center button-text">המתכונים של סבתוש</span>
+</a>
+
+     
+        <!-- rights popup -->
+        <div id="rightsPopup" class="rights-popup">
+            <span class="close-popup" onclick="closePopup('rightsPopup')">×</span>
+            <h2>הזכויות של סבתוש</h2>
+            <ul class="rights-list" id="rightsList"></ul>
+        </div>
+    </main>
+
+    <footer id="footer" class="bg-gray-200 text-gray-800 p-8">
+        <div class="container mx-auto text-center">
+            <p class="text-2xl">צריכים עזרה? התקשרו אלינו: 1-800-555-0000</p>
+        </div>
+    </footer>
+<div class="text-center mt-8">
+    <button onclick="openSavtushQuiz()" class="inline-flex items-center bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-4 px-8 rounded-full shadow-md hover:shadow-lg transition duration-300">
+        <i class="fas fa-door-open text-3xl ml-4"></i>
+        <span class="text-xl">סיימתם את הביקור בבית של סבתוש? לחצו כאן</span>
+    </button>
+</div>
+
+    <div id="newsModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50 hidden">
+        <div class="bg-white text-gray-800 p-10 rounded-3xl max-w-2xl w-full shadow-2xl">
+            <h2 class="text-4xl font-bold mb-8">חדשות</h2>
+            <div id="newsContainer"></div>
+            <button onclick="closeNews()" class="bg-gray-300 hover:bg-gray-400 px-8 py-4 rounded-lg text-2xl transition-colors">סגור</button>
+        </div>
+    </div>
+
+    <div id="questionnaire" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50 hidden">
+        <div class="bg-white text-gray-800 p-10 rounded-3xl max-w-2xl w-full shadow-2xl">
+            <h2 class="text-4xl font-bold mb-8">שאלון יומי</h2>
+            <div id="chatContainer" class="h-96 overflow-y-auto mb-4 space-y-4 p-2">
+                <!-- השיחה תתווסף כאן -->
+            </div>
+            <div id="optionsContainer" class="flex flex-wrap justify-center gap-2 mb-4">
+                <!-- אפשרויות התשובה יתווספו כאן -->
+            </div>
+            <button id="startButton" onclick="startQuestionnaire()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-colors">
+                התחל שיחה
+            </button>
+            <button onclick="closeQuestionnaire()" class="bg-gray-300 hover:bg-gray-400 px-8 py-4 rounded-lg text-2xl transition-colors">סגור</button>
+        </div>
+    </div>
+
+    <!-- מודאל לתצוגת וידאו -->
+    <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-2xl max-w-2xl w-full shadow-xl">
+            <h2 class="text-3xl font-bold mb-6 text-blue-700">צ'אט וידאו עם נכדים</h2>
+            <div class="relative">
+                <video id="videoElement" class="w-full h-64 bg-gray-200" autoplay></video>
+                <canvas id="canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+            <button id="startDetectionButton" onclick="startDetection()" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-colors">
+                התחל זיהוי
+            </button>
+            <button id="stopDetectionButton" onclick="stopDetection()" class="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-colors" disabled>
+                הפסק זיהוי
+            </button>
+            <button onclick="closeVideoChat()" class="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-colors">
+                סיים שיחה
+            </button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- כפתור שליטה במוזיקה -->
+    <button id="musicControl" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <i class="fas fa-pause"></i> עצור מוזיקה
+    </button>
+
+    <!-- שליטה בעוצמת הקול -->
+    <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.5">
+
+    <audio id="backgroundMusic" loop>
+        <source src="C:\Users\User\Downloads\שירים מהמגירה\audio\music.mp3.mp3" type="audio/mpeg">
+        הדפדפן שלך אינו תומך בתג האודיו.
+    </audio>
+
+    <script>
+        const header = document.getElementById('header');
+        const footer = document.getElementById('footer');
+        const toggleDarkMode = document.getElementById('toggleDarkMode');
+        const questionnaire = document.getElementById('questionnaire');
+        const musicControl = document.getElementById('musicControl');
+        const volumeControl = document.getElementById('volumeControl');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const videoModal = document.getElementById('videoModal');
+        const videoElement = document.getElementById('videoElement');
+
+        toggleDarkMode.addEventListener('click', () => {
+            document.body.classList.toggle('bg-gray-900');
+            document.body.classList.toggle('text-white');
+            header.classList.toggle('bg-gray-800');
+            footer.classList.toggle('bg-gray-700');
+            footer.classList.toggle('text-white');
+            toggleDarkMode.innerHTML = document.body.classList.contains('bg-gray-900') 
+                ? '<i class="fas fa-sun icon"></i>' 
+                : '<i class="fas fa-moon icon"></i>';
+        });
+
+        function openQuestionnaire() {
+            questionnaire.classList.remove('hidden');
+        }
+
+        function closeQuestionnaire() {
+            questionnaire.classList.add('hidden');
+        }
+
+        // Questionnaire Logic (corrected)
+        const questions = [
+            {
+                question: "שלום סבתוש! מה שלומך היום?",
+                icon: "fa-smile",
+                options: ["מצוין", "בסדר", "לא טוב", "רע"]
+            },
+            {
+                question: "האם את מרגישה לא טוב בגלל כאבים או משהו אחר?",
+                icon: "fa-question-circle",
+                options: ["כאבים", "משהו אחר"]
+            },
+            {
+                question: "איפה הכאבים?",
+                icon: "fa-band-aid",
+                options: ["ראש", "בטן", "פלג גוף תחתון", "ידיים", "רגליים"]
+            },
+            {
+                question: "האם תרצי לשוחח עם מישהו?",
+                icon: "fa-phone",
+                options: ["כן", "לא"]
+            },
+            {
+                question: "האם אכלת היום?",
+                icon: "fa-utensils",
+                options: ["כן", "לא"]
+            },
+            {
+                question: "האם יצאת מהבית היום?",
+                icon: "fa-home",
+                options: ["כן", "לא"]
+            },
+            {
+                question: "האם דיברת עם המשפחה היום?",
+                icon: "fa-users",
+                options: ["כן", "לא"]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let answers = {};
+
+        function startQuestionnaire() {
+            document.getElementById('startButton').style.display = 'none';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const chatContainer = document.getElementById('chatContainer');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // הוספת שאלה לצ'אט
+            const questionElement = document.createElement('div');
+            questionElement.className = 'chat-message bg-blue-100 p-4 rounded-lg max-w-3/4 mr-auto';
+            questionElement.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <i class="fas ${currentQuestion.icon} text-2xl text-blue-600 mr-2"></i>
+                    <span class="font-bold">סבתוש-בוט</span>
+                </div>
+                <p>${currentQuestion.question}</p>
+            `;
+            chatContainer.appendChild(questionElement);
+
+            // הוספת אפשרויות תשובה
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-lg transition-colors';
+                button.textContent = option;
+                button.onclick = () => answerQuestion(option);
+                optionsContainer.appendChild(button);
+            });
+
+            // גלילה לתחתית הצ'אט
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function answerQuestion(answer) {
+            answers[currentQuestionIndex] = answer;
+
+            // הוספת התשובה לצ'אט
+            const chatContainer = document.getElementById('chatContainer');
+            const answerElement = document.createElement('div');
+            answerElement.className = 'chat-message bg-green-100 p-4 rounded-lg max-w-3/4 ml-auto';
+            answerElement.innerHTML = `
+                <div class="flex items-center justify-end mb-2">
+                    <span class="font-bold">את</span>
+                </div>
+                <p>${answer}</p>
+            `;
+            chatContainer.appendChild(answerElement);
+
+            // מעבר לשאלה הבאה או סיום השאלון
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++; 
+                setTimeout(showQuestion, 1000); // השהיה קצרה לפני השאלה הבאה
+            } else {
+                setTimeout(finishQuestionnaire, 1000);
+            }
+
+            // גלילה לתחתית הצ'אט
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showFeedback(message) {
+            const chatContainer = document.getElementById('chatContainer');
+            const feedbackElement = document.createElement('div');
+            feedbackElement.className = 'chat-message bg-blue-100 p-4 rounded-lg max-w-3/4 mr-auto';
+            feedbackElement.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-robot text-2xl text-blue-600 mr-2"></i>
+                    <span class="font-bold">סבתוש-בוט</span>
+                </div>
+                <p>${message}</p>
+            `;
+            chatContainer.appendChild(feedbackElement);
+        }
+
+        function finishQuestionnaire() {
+            const chatContainer = document.getElementById('chatContainer');
+            const optionsContainer = document.getElementById('optionsContainer');
+            
+            const finishElement = document.createElement('div');
+            finishElement.className = 'chat-message bg-blue-100 p-4 rounded-lg max-w-3/4 mr-auto';
+            finishElement.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-check-circle text-2xl text-green-600 mr-2"></i>
+                    <span class="font-bold">סבתוש-בוט</span>
+                </div>
+                <p>תודה על השיחה! התשובות שלך נשמרו. מקווה שיהיה לך יום נפלא!</p>
+            `;
+            chatContainer.appendChild(finishElement);
+            optionsContainer.innerHTML = '';
+
+            saveAnswers();
+        }
+
+        function saveAnswers() {
+            const date = new Date().toISOString().split('T')[0];
+            const savedAnswers = JSON.parse(localStorage.getItem('questionnaireAnswers') || '{}');
+            savedAnswers[date] = answers;
+            localStorage.setItem('questionnaireAnswers', JSON.stringify(savedAnswers));
+            console.log('תשובות נשמרו:', answers);
+        }
+
+        
+        // Music Control
+        window.addEventListener('load', () => {
+            backgroundMusic.volume = 0.5;  // עוצמת קול התחלתית
+            backgroundMusic.play().catch(error => {
+                console.log('לא ניתן להפעיל מוזיקה אוטומטית:', error);
+                musicControl.innerHTML = '<i class="fas fa-music"></i>שיר סבתוש';
+            });
+        });
+
+        musicControl.addEventListener('click', toggleMusic);
+        volumeControl.addEventListener('input', adjustVolume);
+
+        function toggleMusic() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                musicControl.innerHTML = '<i class="fas fa-pause"></i> עצור מוזיקה';
+            } else {
+                backgroundMusic.pause();
+                musicControl.innerHTML = '<i class="fas fa-music"></i> הפעל מוזיקה';
+            }
+        }
+
+        function adjustVolume() {
+            backgroundMusic.volume = volumeControl.value;
+        }
+
+        // Video Chat Logic
+        let model;
+        let isDetecting = false;
+        let detectionTimeout; // משמש להשהיה
+
+        // טעינת המודל
+        async function loadModel() {
+            model = await cocoSsd.load();
+        }
+
+        loadModel();
+
+        function startVideoChat() {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function(stream) {
+                    videoElement.srcObject = stream;
+                    videoModal.classList.remove('hidden');
+                    speakMessage("תגידו שלום לסבתוש");
+                })
+                .catch(function(err) {
+                    alert('לא הצלחנו לקבל גישה למצלמה: ' + err.message);
+                });
+        }
+
+        function closeVideoChat() {
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+            }
+            videoModal.classList.add('hidden');
+            stopDetection();
+        }
+
+        function startDetection() {
+            if (!model) {
+                alert('המודל עדיין בטעינה, אנא המתן מעט');
+                return;
+            }
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // ניקוי הקנבס
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+
+            // התחלת השהיה
+            detectionTimeout = setTimeout(() => {
+                // התחלת זיהוי אובייקטים
+                isDetecting = true;
+                detect();
+            }, 1000); // השהיה של 1 שנייה
+
+            document.getElementById('startDetectionButton').disabled = true;
+            document.getElementById('stopDetectionButton').disabled = false;
+        }
+
+        function stopDetection() {
+            isDetecting = false;
+            clearTimeout(detectionTimeout); // ביטול ההשהיה
+
+            document.getElementById('startDetectionButton').disabled = false;
+            document.getElementById('stopDetectionButton').disabled = true;
+        }
+
+        async function detect() {
+            if (!isDetecting) return;
+
+            const video = document.getElementById('videoElement');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const predictions = await model.detect(video);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            let detectedObjects = [];
+
+            predictions.forEach(prediction => {
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(...prediction.bbox);
+
+                ctx.fillStyle = 'red';
+                ctx.font = '18px Arial';
+                ctx.fillText(prediction.class, prediction.bbox[0], prediction.bbox[1] > 10 ? prediction.bbox[1] - 5 : 10);
+
+                detectedObjects.push(prediction.class);
+            });
+
+            if (detectedObjects.length > 0) {
+                const hebrewObjects = detectedObjects.map(obj => translateToHebrew(obj));
+                const description = "אני רואה: " + hebrewObjects.join(', ');
+                speakMessage(description, 1, 'female');
+
+                // הפסקת זיהוי לאחר שהודעה אחת נאמרה
+                stopDetection(); 
+            } else {
+                speakMessage("לא זיהיתי שום דבר מיוחד בתמונה", 1, 'female');
+                // הפסקת זיהוי לאחר שהודעה אחת נאמרה
+                stopDetection(); 
+            }
+        }
+
+        function translateToHebrew(englishWord) {
+            const translations = {
+                'person': 'אדם',
+                'bicycle': 'אופניים',
+                'car': 'מכונית',
+                'motorcycle': 'אופנוע',
+                'airplane': 'מטוס',
+                'bus': 'אוטובוס',
+                'train': 'רכבת',
+                'truck': 'משאית',
+                'boat': 'סירה',
+                'traffic light': 'רמזור',
+                'fire hydrant': 'ברז כיבוי אש',
+                'stop sign': 'תמרור עצור',
+                'parking meter': 'מדחן',
+                'bench': 'ספסל',
+                'bird': 'ציפור',
+                'cat': 'חתול',
+                'dog': 'כלב',
+                'horse': 'סוס',
+                'sheep': 'כבשה',
+                'cow': 'פרה',
+                'elephant': 'פיל',
+                'bear': 'דוב',
+                'zebra': 'זברה',
+                'giraffe': 'ג\'ירפה',
+                // ... הוסף עוד תרגומים לפי הצורך
+            };
+
+            return translations[englishWord] || englishWord;
+        }
+
+        function speakMessage(message, volume = 1, voice = 'male') {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(message);
+                speech.lang = 'he-IL';
+                speech.volume = volume;
+                speech.rate = 0.9;
+                speech.pitch = 1;
+                speech.voice = voice === 'male' ? speechSynthesis.getVoices().filter(v => v.name.includes('Hebrew'))[0] : speechSynthesis.getVoices().filter(v => v.name.includes('Hebrew (female)'))[0];
+
+                window.speechSynthesis.speak(speech);
+            } else {
+                console.log('הדפדפן לא תומך בדיבור מלאכותי');
+            }
+        }
+
+   
+
+        function closeNewsVideo() {
+            document.getElementById('newsVideoModal').classList.add('hidden');
+        }
+     
+
+        
+
+        function closePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            const overlay = document.getElementById('overlay');
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+ 
+</script>
+</body>
+</html>
+<!-- החלון הקופץ של סבתוש -->
+<div id="savtushQuizPopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-2xl leading-6 font-bold text-gray-900 mb-4">סבתוש היא יותר...</h3>
+            <div class="flex flex-col space-y-4">
+                <button onclick="showImage('polish')" class="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+                    <span class="mr-2">👵</span> פולניה
+                </button>
+                <button onclick="showImage('moroccan')" class="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300">
+                    <span class="mr-2">😄</span> מרוקאית
+                </button>
+                <button onclick="showImage('kvetcher')" class="flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">
+                    <span class="mr-2">🦟</span> קרציה
+                </button>
+            </div>
+            <div id="imageContainer" class="mt-4">
+                <!-- האיור המלא יוצג כאן -->
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="closePopup" class="mt-4 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300">
+                    סגור
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openSavtushQuiz() {
+    document.getElementById('savtushQuizPopup').classList.remove('hidden');
+}
+
+function showImage(type) {
+    const imageContainer = document.getElementById('imageContainer');
+    imageContainer.innerHTML = ''; // נקה תמונות קודמות
+    const img = document.createElement('img');
+    
+    switch(type) {
+        case 'polish':
+            img.src = 'images/polish.png'; // החלף עם URL של איור פולניה
+            img.alt = 'פולניה';
+            break;
+        case 'moroccan':
+            img.src = 'images/moroccan.png'; // החלף עם URL של איור מרוקאית
+            img.alt = 'מרוקאית';
+            break;
+        case 'kvetcher':
+            img.src = 'images/kvetcher.png'; // החלף עם URL של איור קרציה
+            img.alt = 'קרציה';
+            break;
+    }
+    
+    img.className = 'mx-auto mt-4 rounded-lg shadow-md';
+    imageContainer.appendChild(img);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const closeButton = document.getElementById('closePopup');
+    const popup = document.getElementById('savtushQuizPopup');
+    
+    if (closeButton && popup) {
+        closeButton.addEventListener('click', function() {
+            popup.classList.add('hidden');
+        });
+    }
+});
+</script>
+
+<div id="savtushQAModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-2xl leading-6 font-bold text-gray-900 mb-4">שאלות ותשובות עם סבתוש</h3>
+            <div id="questionContainer" class="mb-4"></div>
+            <input type="text" id="answerInput" class="w-full px-3 py-2 border rounded-md" placeholder="הקלד את תשובתך כאן">
+            <button onclick="window.checkAnswer()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">בדוק תשובה</button>
+            <button onclick="window.closeSavtushQA()" class="mt-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">סגור</button>
+        </div>
+    </div>
+</div>
+<script type="module">
+    import { openSavtushQA, closeSavtushQA, showRandomQuestion, checkAnswer } from './savtush-qa.js.txt';
+    window.openSavtushQA = openSavtushQA;
+    window.closeSavtushQA = closeSavtushQA;
+    window.showRandomQuestion = showRandomQuestion;
+    window.checkAnswer = checkAnswer;
+ function openSavtushQA() {
+    document.getElementById('savtushQAModal').classList.remove('hidden');
+</script>
+<script src="C:\Users\User\Downloads\שירים מהמגירה\savtush-qa.js.txt"></script>
+</body>
+</html>
